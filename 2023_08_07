@@ -1,0 +1,286 @@
+# 2023-08-07 싸피
+
+### 문자열(string)
+
+- 문자열
+- 패턴 매칭
+- 문자열 암호화
+- 문자열 압축
+
+```python
+# strlen() 함수 만들어 보기
+def strlen(a) : # '\0'을 만나면 '\0'을 제외한 글자수를 리턴
+		i = 0
+		while a[:] != '\0':
+				i += 1
+		return i
+
+a = ['a', 'b', 'c', '\0']
+print(strlen(a))
+```
+
+(Python부분만 위로 올렸음 공통, C, JAVA 관련은 아래에)
+
+### Python에서의 문자열 처리
+
+- char 타입 없음
+- 텍스트 데이터의 취급 방법이 통일되어 있음
+- 문자열 기호
+    - ‘(홑 따옴표), “(쌍 따옴표), ‘’’(홑 따옴표 3개), “””(쌍 따옴표 3개)
+    - + 연결(Concatenation)
+        - 문자열 + 문자열 : 이어 붙여주는 역할
+    - * 반복
+        - 문자열 * 수 : 수만큼 문자열이 반복
+
+### Python에서의 문자열 처리
+
+- 문자열은 시퀀스 자료형으로 분류되고, 시퀀스 자료형에서 사용할 수 있는 인덱싱, 슬라이싱 연산들을 사용할 수 있음
+- 문자열 클래스에서 제공되는 메소드
+- {replace(), split(), isalpha(), find()}
+- 문자열은 튜플과 같이 요소 값을 변경 할 수 없음(immutable)
+
+### 문자열 뒤집기
+
+- 자기 문자열부터 뒤집는 방법
+    - swap을 위한 임시 변수가 필요하며 반복 수행을 문자열 길이의 반만큼 수행해야 한다.
+- 새로운 빈 문자열을 만들어 소스의 뒤에서부터 읽어서 타겟에 쓰는 방법이 있다.
+
+### Python에서 문자열 뒤집기
+
+```python
+s = 'Reverse this strings'
+s = s[::-1]
+s = 'abcd'
+s_lst = list(s)
+N = len(s)
+s.reverse()
+s = ".join(s)
+# 아래에 for 문을 이용해 구현한다.
+s = 'Reverse'
+s_lst = list(s)
+N = len(s)
+for i in range(N//2):
+    s_lst[i], s_lst[N-1-i] = s_lst[N-1-i], s_lst[i]
+print(s_lst)
+# 결과값
+['e', 's', 'r', 'e', 'v', 'e', 'R']
+print(''.join(s_lst))
+# 결과값
+esreveR
+```
+
+## 패턴 매칭
+
+- 고지식한 패턴 검색 알고리즘
+- 카프 - 라빈 알고리즘
+- KMP 알고리즘
+- 보이어 - 무어 알고리즘
+
+### 고지식한 알고리즘(Brute Force)
+
+- 본문 문자열을 처음부터 끝까지 차례대로 순회하면서 패턴 내의 문자들을 일일이 비교하는 방식으로 동작
+
+```python
+p = 'is' # 찾을 패턴
+t = 'This is a book~!' # 전체 텍스트
+M = len(p) # 찾을 패턴의 길이
+N = lent(t) # 전체 텍스트의 길이
+
+def BruteForce(p, t) :
+		i = 0 # t의 인덱스
+		j = 0 # p의 인덱스
+		while j < M and i < N :
+				if t[i] != p[j] :
+						i = i -j
+						j = -1
+				i = i + 1
+				j = j + 1
+		if j == M :
+				return i - M # 검색 성공
+		else :
+				return -1 # 검색 실패
+```
+
+### 고지식한 패턴 검색 알고리즘의 시간 복잡도
+
+- 최악의 경우 시간 복잡도는 텍스트의 모든 위치에서 패턴을 비교해야 하므로 O(MN)이 됨
+- 길이가 10000인 문자열에서 길이 80인 패턴을 찾는다고 할 때, 최악의 경우 약 10,000 * 80 = 800,000번의 비교가 일어난다.
+- 비교횟수를 줄일 방법은?
+
+### KMP 알고리즘
+
+- 불일치가 발생한 텍스트 스트링의 앞 부분에 어떤 문자가 있는지를 미리 알고 있으므로, 불일치가 발생한 앞 부분에 대하여 다시 비교하지 않고 매칭을 수행
+- 패턴을 전처리하여 배열 next[M]을 구해서 잘못된 시작을 최소화함
+    - next[M] : 불일치가 발생했을 경우 이동할 다음 위치
+- 시간 복잡도 : O(M+N)
+
+### KMP 알고리즘 아이디어
+
+- 텍스트에서 abcdabc까지는 매치되고, e에서 실패한 상황 패턴의 맨 앞의 abc와 실패 직전의 abc는 동일함을 이용할 수 있다.
+- 실패한 텍스트 문자와 P[4]를 비교한다.
+
+![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/aa63ccc6-d90b-4b9d-9784-421f8cd2e8ff/Untitled.png)
+
+- 매칭이 실패했을 때 돌아갈 곳을 계산한다.
+
+![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/019b308f-28af-41bc-92aa-bca8e58660f3/Untitled.png)
+
+### 보이어 - 무어 알고리즘
+
+- 오른쪽에서 왼쪽으로 비교
+- 대부분의 상용 소프트웨어에서 채택하고 있는 알고리즘
+- 보이어 - 무어 알고리즘은 패턴에 오른쪽 끝에 있는 문자가 불일치 하고 이 문자가 패턴 내에 존재하지 않는 경우, 이동 거리는 무려 패턴의 길이 만큼이 된다.
+
+![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/dbc777cc-7253-4d7b-8e82-5796ed22c33b/Untitled.png)
+
+- 오른쪽 끝에 있는 문자가 불일치 하고 이 문자가 패턴 내에 존재할 경우
+
+![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/f225bf52-035f-4689-9f63-7ade843f77b6/Untitled.png)
+
+- 보이어 - 무어 알고리즘을 이용한 예
+
+![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/88894ec5-9900-4df5-b3b0-920320ea97b6/Untitled.png)
+
+- rithm 문자열의 skip 배열
+
+![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/1161f912-84df-4fe2-83ab-69cb3b184f0a/Untitled.png)
+
+### 문자열 매칭 알고리즘 비교
+
+- 찾고자 하는 문자열 패턴의 길이 m, 총 문자열 길이 n
+- 고지식한 패턴 검색 알고리즘 : 수행 시간 O(mn)
+- 카프 - 라빈 알고리즘 : 수행시간 : O(n)
+- KMP 알곡리즘 : 수행시간 O(n)
+
+### 보이어 무어 알고리즘 특징
+
+- 보이어-무어 알고리즘
+    - 앞의 두 매칭 알고리즘들의 공통점 텍스트 문자열의 문자를 적어도 한 번씩  훑는다는 것이다. 따라서 최선의 경우에도 n
+    - 보이어 - 무어 알고리즘은 텍스트 문자를 다 보지 않아도 된다
+    - 발상의 전환 : 패턴의 오른쪽부터 비교한다
+    - 최악의 경우 수행 시간 : O(mn)
+    - 입력에 따라 다르지만 일반적으로 O(n)보다 시간이 덜 든다
+
+## 아래 내용 밑으로 내릴 것
+
+### 컴퓨터의 문자 표현
+
+- 글자 A를 메모리에 저장하는 방법은?
+- 각 문자에 대해서 대응되는 숫자를 정해 놓고 이것을 메모리에 저장하는 방법
+- 영어가 대, 소문자 합쳐서 52 이므로 6(64가지)비트면 모두 표현할 수 있다 이를 코드 체계라고 한다.
+- 네트워크가 발전하면서 서로 간에 정보를 주고 받을 때 정보를 달리 해석한다는 문제가 생겼고, 혼동을 피하기 위해 표준 안을 만들기로 했다.
+- 이러한 혼동을 피하기 위해 미국에서 ASCII 문자 인코딩 표준이 제정되었다.
+- ASCII는 7bit 인코딩으로 128문자를 표현하며 33개의 출력 불가능한 제어 문자들과 공백을 비롯한 95개의 출력 가능한 문자들로 이루어져 있다.
+- 확장 아스키는 표준 문자 외의 악센트 문자, 도형 문자, 특수 문자, 특수 기호 등 부가적인 문자를 128개 추가할 수 있게 하는 부호이다.
+- 오늘날 대부분의 컴퓨터는 문자를 읽고 쓰는데 ASCII형식을 사용한다.
+- 컴퓨터의 발전으로 미국 뿐 아니라 각 나라에서 자국의 문자를 표현하기 위해 코드체계를 만들어서 사용한다. (우리나라도 조합형, 완성형 두 종류를 가지고 있었다.)
+- 국가 간에 정보를 주고 받을 때 혼동이 생겼고, 자국의 코드체계를 타 국가가 가지고 있지 않으면 정보를 잘못 해석할 수 있어 다국어 처리를 위한 표준으로 **유니코드**를 마련했다.
+
+### 유니코드도 다시 Character Set으로 분류된다.
+
+- UCS-2(Universal Character Set 2)
+- UCS-4(Universal Character Set 4)
+- 유니코드를 저장하는 변수의 크기를 정의(but 바이트 순서에 대해 표준화 실패)
+- **파일을 인식 시, 이 파일이 UCS-2, UCS-4인지 인식하고 각 경우를 구분해서 모두 다르게 구현해야 하는 문제 발생**
+- **따라서 유니코드의 적당한 외부 인코딩이 필요하게 되었다**
+
+### 유니코드 인코딩 (UTF : Unicode Transformation Format)
+
+- UTF - 8 (in web)
+    - MIN : 8bit, Max : 32bit(1 Byte * 4)
+- UTF-16 (in windows, java)
+    - MIN : 16bit, Max : 32bit(2 Byte * 2)
+- UTF-32 (in unix)
+    - MIN : 32bit, Max : 32bit(4 Byte * 1)
+
+### Python 인코딩
+
+- 2.x 버전 - ASCII - #-*- coding: utf-8 -*-(첫 줄에 명시)
+- 3.x 버전 -유니코드 UTF-8 생략 가능
+- 다른 인코딩 방식으로 처리 시 첫 줄에 작성하는 위 항목에 원하는 인코딩 방식을 지정해주면 됨
+
+![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/f8310a2f-f291-4b22-bd8f-f8fd62d3fda4/Untitled.png)
+
+![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/08d9c2bd-27f6-4b4a-9127-d87be5e42561/Untitled.png)
+
+![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/5194c9f9-2bfd-4aaf-a62c-1ab0fac0d0b3/Untitled.png)
+
+![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/eed65999-0187-4888-adec-afdd38d53461/Untitled.png)
+
+![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/7de98e55-e7c0-454e-a67e-4ab7dfd04382/Untitled.png)
+
+### 문자열 비교
+
+- C strcmp() 함수를 제공한다.
+- Java 에서는 equals() 메소드를 제공한다.
+    - 문자열 비교에서 == 연산은 메모리 참조가 같은 지를 묻는 것
+- 파이썬에서는 == 연산자와 is 연산자를 제공한다.
+    - == 연산자는 내부적으로 특수 메서드 ‘_eq_()’를 호출
+
+```python
+# s1관 나머지 문자열을 is, ==으로 비교한 결과 확인
+s1 = 'abc'
+s2 = 'abc'
+s3 = 'def'
+s4 = s1
+s5 = s1[:2] + 'c'
+
+if s1 == s5:
+    print('s1==s5')
+else:
+    print('s1!=s5')
+# 결과값
+s1==s5 (True)
+
+if s1 is s5:
+    print('s1 is s5')
+else:
+    print('s1 is not s5')
+
+# 결과값
+s1 is not s5 (False)
+
+s1 == s2, s1 is s2
+# 결과값
+True
+```
+
+### 문자열 비교 함수 만들기
+
+```python
+# 문자열이 같으면 0 리턴
+# str1이 str2보다 사전 순서상 앞서면 음수 혹은 -1 리턴
+# str1이 str2보다 사전 순서상 나중이면 양수 혹은 1 리턴
+```
+
+### 문자열 숫자를 정수로 변환하기
+
+![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/5e6d234b-3c43-4474-8ffd-6bf9cd9563e4/Untitled.png)
+
+```python
+# atoi() 함수 만들기
+def atoi(s):
+		i = 0
+		for x in s:
+				i = i * 10 + ord(x) - ord('0')
+			return i
+```
+
+### str() 함수 없이 itoa() 구현
+
+```python
+# 양의 정수를 입력 받아 문자열로 변환하는 함수
+# 입력 값 : 변환할 정수 값, 변환된 문자열을 저장할 문자배열
+# 반환 값 : 없음
+def itoa(a):
+		s = ''
+		while a > 0:
+				s += chr(ord('0') + a % 10) #1의 자리 숫자의 ASCII값
+				a //= 10
+		return s[::-1]
+
+a = 123
+itoa(a)
+```
+
+.
